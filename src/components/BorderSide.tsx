@@ -1,23 +1,32 @@
-import { memo, type ReactNode } from 'react';
+import classNames from 'classnames';
 
-//TODO: Transfer these variables to Board component
-const NUMERIC_SIDE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const ALPHABETIC_SIDE = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+type BorderSideItem = number | string;
 
-interface BorderSideProps<T> {
-  items: T[];
+interface BorderSideProps {
+  items: BorderSideItem[];
+  position: 'top' | 'left';
 }
 
-const BorderSide = <T,>({ items }: BorderSideProps<T>) => {
+export const BorderSide = ({ items, position }: BorderSideProps) => {
+  const borderSideDefaultStyle = 'absolute grid';
+  const topBorderSideStyle = `left-0 top-[-30px] right-0 grid-cols-[repeat(10,1fr)]`;
+  const leftBorderSideStyle = 'left-[-20px] top-0 bottom-0';
+
+  const borderSideDynamicStyle = {
+    [leftBorderSideStyle]: position === 'left',
+    [topBorderSideStyle]: position === 'top',
+  };
+
   return (
-    <div className="absolute top-0 left-0 right-0 flex gap-[5px]">
+    <div className={classNames(borderSideDefaultStyle, borderSideDynamicStyle)}>
       {items.map(item => (
-        <div>{item as ReactNode}</div>
+        <div
+          key={item}
+          className="flex justify-center items-center font-medium"
+        >
+          {item.toString().toUpperCase()}
+        </div>
       ))}
     </div>
   );
 };
-
-const MemoizedBorderSide = memo(BorderSide);
-
-export { MemoizedBorderSide as BorderSide };
