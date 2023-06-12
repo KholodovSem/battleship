@@ -1,7 +1,12 @@
-import './App.css';
+import './index.css';
+import { Board } from '@/components/Board';
 
 function App() {
-  return <div>Sea Wars</div>;
+  return (
+    <div>
+      <Board />
+    </div>
+  );
 }
 
 export default App;
