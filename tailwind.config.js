@@ -10,7 +10,8 @@ export default {
       'dark': '#201e1f',
       'grey': '#ebeaeb',
       'blue': '#3fa7d6',
-      'red': '#f24236'
+      'red': '#f24236',
+      'yellow': '#ffd60a'
     },
     extend: {},
   },
