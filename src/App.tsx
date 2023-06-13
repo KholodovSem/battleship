@@ -7,6 +7,7 @@ import { AppRoutes } from '@/utils/app-routes';
 import { StartScreen } from '@/pages/start-screen/StartScreen';
 import { Board } from './components/Board';
 
+
 function App() {
   return (
     <Router>

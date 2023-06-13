@@ -7,7 +7,7 @@ Play your favorite Battleship game in your browser or on your smartphone
 <ul>
   <h2>Tech stack</h2>
   <li>Tailwind, classNames (styling)</li>
-  <li>React-quert (fetching data)</li>
+  <li>React-query (fetching data)</li>
   <li>Redux (state manager)</li>
   <li>React-router-dom (navigation)</li>
   <li>Socket.io (multiplayer)</li>
