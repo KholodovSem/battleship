@@ -5,12 +5,15 @@ import './index.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppRoutes } from '@/utils/app-routes';
 import { StartScreen } from '@/pages/start-screen/StartScreen';
+import { Board } from './components/Board';
+
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path={AppRoutes.START_SCREEN} element={<StartScreen />} />
+        <Route path={AppRoutes.SINGLEPLAYER} element={<Board />} />
       </Routes>
     </Router>
   );
