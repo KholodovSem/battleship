@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import classNames from 'classnames';
 
 type BorderSideItem = number | string;
@@ -7,7 +8,7 @@ interface BorderSideProps {
   position: 'top' | 'left';
 }
 
-export const BorderSide = ({ items, position }: BorderSideProps) => {
+const BorderSide = ({ items, position }: BorderSideProps) => {
   const borderSideDefaultStyle = 'absolute grid';
   const topBorderSideStyle = `left-0 top-[-30px] right-0 grid-cols-[repeat(10,1fr)]`;
   const leftBorderSideStyle = 'left-[-20px] top-0 bottom-0';
@@ -30,3 +31,6 @@ export const BorderSide = ({ items, position }: BorderSideProps) => {
     </div>
   );
 };
+
+const MemoizedBorderSide = memo(BorderSide);
+export { MemoizedBorderSide as BorderSide };

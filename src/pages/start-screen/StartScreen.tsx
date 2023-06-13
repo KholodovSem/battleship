@@ -29,7 +29,7 @@ export const StartScreen = () => {
         <CardBody>
           <Box display="flex" flexDirection="column" gap="10px">
             {navigation.map(({ label, path }) => (
-              <Link to={path}>
+              <Link key={label} to={path}>
                 <Button
                   variant="solid"
                   size="lg"
