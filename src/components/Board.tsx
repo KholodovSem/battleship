@@ -1,13 +1,13 @@
 import { useState, type MouseEvent } from 'react';
 import { Cell, CellType } from '@/components/Cell';
 import { BorderSide } from '@/components/BorderSide';
-
+import battleFieldGenerate from '@/helpers/battleFieldGenerate';
 const BOARD_HEIGHT = 10;
 const BOARD_WIDTH = 10;
 const CELL_TYPE_IN_HTML = 'board-cell';
 
-const NUMERIC_SIDE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-const ALPHABETIC_SIDE = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+const NUMERIC_SIDE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+const ALPHABETIC_SIDE = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 /* 
 Number of ships
@@ -40,30 +40,32 @@ type ShipCoordinates = [RowIndex, ColumnIndex];
 interface Ship {
   type: ShipType;
   orientation: ShipOrientation;
-  coordinates: ShipCoordinates[];
+  coordinates: number[][];
   damaged: ShipCoordinates[];
 }
 
 //TODO: Handle dublicates in "coordinates", "damaged", "missedShoots" when handlingBoardClick.
 
-const initialState: Ship[] = [
-  {
-    type: 'Huge ship',
-    orientation: 'horizontal',
-    coordinates: [
-      [0, 1],
-      [0, 2],
-      [0, 3],
-      [0, 4],
-    ],
-    damaged: [],
-  },
-];
+// const initialState: Ship[] = [
+//   {
+//     type: 'Huge ship',
+//     orientation: 'horizontal',
+//     coordinates: [
+//       [0, 1],
+//       [0, 2],
+//       [0, 3],
+//       [0, 4],
+//     ],
+//     damaged: [],
+//   },
+// ];
+
+const initialState: Ship[] = battleFieldGenerate();
 
 export const Board = () => {
   const [ships, setShips] = useState<Ship[]>(initialState);
   const [missedShoots, setMissedShoots] = useState<ShipCoordinates[]>([]);
-
+  battleFieldGenerate();
   const boardWrapperStyle =
     'relative w-full h-screen flex items-center justify-center';
   const boardStyle =
