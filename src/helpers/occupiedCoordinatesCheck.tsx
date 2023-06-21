@@ -7,7 +7,7 @@ type ShipCoordinates = [RowIndex, ColumnIndex];
 interface Ship {
   type: ShipType;
   orientation: ShipOrientation;
-  coordinates: number[][];
+  coordinates: ShipCoordinates[];
   damaged: ShipCoordinates[];
 }
 
@@ -16,54 +16,41 @@ interface Ship {
 
 export const occupiedCoordinatesCheck = (
   ship: Ship,
-  shipsOwnCoordinatesIncluded: boolean
-): number[][] => {
-  const orientation: string = ship.orientation;
-  const shipCoordinates: number[][] = ship.coordinates;
-  const shipLength: number = shipCoordinates.length - 1;
+  shipsOwnCoordinatesIncluded?: boolean
+): ShipCoordinates[] => {
+  const { orientation, coordinates } = ship;
+  const shipLength = coordinates.length - 1;
+  const occupiedCoordinates: ShipCoordinates[] = [];
 
-  let occupiedCoordinates: number[][] = [];
   if (orientation === 'horizontal') {
-    occupiedCoordinates.push(
-      [shipCoordinates[0][0], shipCoordinates[0][1] - 1],
-      [shipCoordinates[0][0] - 1, shipCoordinates[0][1] - 1],
-      [shipCoordinates[0][0] + 1, shipCoordinates[0][1] - 1],
-      [shipCoordinates[shipLength][0], shipCoordinates[shipLength][1] + 1],
-      [shipCoordinates[shipLength][0] - 1, shipCoordinates[shipLength][1] + 1],
-      [shipCoordinates[shipLength][0] + 1, shipCoordinates[shipLength][1] + 1]
-    );
-
     for (let i = 0; i <= shipLength; i++) {
       occupiedCoordinates.push(
-        [shipCoordinates[i][0] - 1, shipCoordinates[i][1]],
-        [shipCoordinates[i][0] + 1, shipCoordinates[i][1]]
+        [coordinates[i][0], coordinates[i][1] - 1],
+        [coordinates[i][0] - 1, coordinates[i][1] - 1],
+        [coordinates[i][0] + 1, coordinates[i][1] - 1],
+        [coordinates[i][0], coordinates[i][1] + 1],
+        [coordinates[i][0] - 1, coordinates[i][1] + 1],
+        [coordinates[i][0] + 1, coordinates[i][1] + 1]
       );
     }
-  }
-
-  if (orientation === 'vertical') {
-    occupiedCoordinates.push(
-      [shipCoordinates[0][0] - 1, shipCoordinates[0][1]],
-      [shipCoordinates[0][0] - 1, shipCoordinates[0][1] - 1],
-      [shipCoordinates[0][0] - 1, shipCoordinates[0][1] + 1],
-      [shipCoordinates[shipLength][0] + 1, shipCoordinates[shipLength][1]],
-      [shipCoordinates[shipLength][0] + 1, shipCoordinates[shipLength][1] - 1],
-      [shipCoordinates[shipLength][0] + 1, shipCoordinates[shipLength][1] + 1]
-    );
-
+  } else {
     for (let i = 0; i <= shipLength; i++) {
       occupiedCoordinates.push(
-        [shipCoordinates[i][0], shipCoordinates[i][1] - 1],
-        [shipCoordinates[i][0], shipCoordinates[i][1] + 1]
+        [coordinates[i][0] - 1, coordinates[i][1]],
+        [coordinates[i][0] - 1, coordinates[i][1] - 1],
+        [coordinates[i][0] - 1, coordinates[i][1] + 1],
+        [coordinates[i][0] + 1, coordinates[i][1]],
+        [coordinates[i][0] + 1, coordinates[i][1] - 1],
+        [coordinates[i][0] + 1, coordinates[i][1] + 1]
       );
     }
   }
 
   if (shipsOwnCoordinatesIncluded) {
-    occupiedCoordinates.push(...shipCoordinates);
+    occupiedCoordinates.push(...coordinates);
   }
 
-  return occupiedCoordinates.filter(coordinate => {
-    return coordinate.every(el => el >= 0 && el <= 9);
-  });
+  return occupiedCoordinates.filter(
+    ([row, col]) => row >= 0 && row <= 9 && col >= 0 && col <= 9
+  );
 };
