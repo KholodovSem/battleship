@@ -14,22 +14,26 @@ type ShipCoordinates = [RowIndex, ColumnIndex];
 interface Ship {
   type: ShipType;
   orientation: ShipOrientation;
-  coordinates: number[][];
+  coordinates: ShipCoordinates[];
   damaged: ShipCoordinates[];
 }
 
 //Core функция, генерирует рандомное расположение кораблей на поле боя.
 export const battleFieldGenerate = () => {
-  let availableCoordinatesArray: number[][] = createAvailableCoordinatesArray();
+  let availableCoordinatesArray: ShipCoordinates[] =
+    createAvailableCoordinatesArray();
   const shipsObject: Ship[] = createShipsStartObject();
   for (let i = 0; i < shipsObject.length; i++) {
     const ship = shipsObject[i];
-    let shipCoordinates: number[][] = buildShipFromRandomCoordinates(
+    let shipCoordinates: ShipCoordinates[] = buildShipFromRandomCoordinates(
       availableCoordinatesArray,
       ship
     );
     ship.coordinates = shipCoordinates;
-    let occupiedCoordinates: number[][] = occupiedCoordinatesCheck(ship, true);
+    let occupiedCoordinates: ShipCoordinates[] = occupiedCoordinatesCheck(
+      ship,
+      true
+    );
     availableCoordinatesArray = deleteOccupiedCoordinatesFromAvailable(
       availableCoordinatesArray,
       occupiedCoordinates

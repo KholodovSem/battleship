@@ -1,5 +1,9 @@
-import { arraysAreEqual } from './arraysAreEqual';
-import { checkPossibleOrientation } from './checkPossibleOrientation';
+import {
+  canTheShipBeBuild,
+  getRandomShipOrientation,
+  calculateShipPlacement,
+  checkIfAllCoordinatesExist,
+} from './canTheShipBeBuild';
 import { getRandomCoordinate } from './getRandomCoordinate';
 
 type ShipType = 'Huge ship' | 'Big ship' | 'Medium ship' | 'Small ship';
@@ -11,49 +15,34 @@ type ShipCoordinates = [RowIndex, ColumnIndex];
 interface Ship {
   type: ShipType;
   orientation: ShipOrientation;
-  coordinates: number[][];
+  coordinates: ShipCoordinates[];
   damaged: ShipCoordinates[];
 }
 //Функция которая возвращает рандомный массив координат корабля который может быть создан, на свободных ячейках
 export const buildShipFromRandomCoordinates = (
-  availableCoordinatesArray: number[][],
+  availableCoordinatesArray: ShipCoordinates[],
   ship: Ship
-): number[][] => {
-  const shipLength = ship.coordinates.length;
-  let randomCoordinate: number[] = getRandomCoordinate(
+): ShipCoordinates[] => {
+  let randomCoordinate: ShipCoordinates = getRandomCoordinate(
+    availableCoordinatesArray
+  );
+  let shipCoordinates: ShipCoordinates[] = [];
+  const canShipBeBuild: boolean = canTheShipBeBuild(ship, randomCoordinate);
+  if (!canShipBeBuild) {
+    return buildShipFromRandomCoordinates(availableCoordinatesArray, ship);
+  }
+  const orientation = getRandomShipOrientation(ship, randomCoordinate);
+  if (orientation) {
+    ship.orientation = orientation;
+    shipCoordinates = calculateShipPlacement(ship, randomCoordinate);
+  }
+
+  const allCoordinatesExist = checkIfAllCoordinatesExist(
+    shipCoordinates,
     availableCoordinatesArray
   );
 
-  let ShipCoordinates: number[][] = [];
-  const orientation: ShipOrientation | null = checkPossibleOrientation(
-    ship,
-    randomCoordinate
-  );
-
-  switch (orientation) {
-    case null:
-      return buildShipFromRandomCoordinates(availableCoordinatesArray, ship);
-    case 'horizontal':
-      for (let i = 0; i <= shipLength - 1; i++) {
-        ShipCoordinates.push([randomCoordinate[0], randomCoordinate[1] + i]);
-      }
-      break;
-    case 'vertical':
-      for (let i = 0; i <= shipLength - 1; i++) {
-        ShipCoordinates.push([randomCoordinate[0] + i, randomCoordinate[1]]);
-      }
-      break;
-  }
-
-  const allCoordinatesExist = ShipCoordinates.every(shipCoordinate => {
-    return availableCoordinatesArray.some(availableCoordinate =>
-      arraysAreEqual(shipCoordinate, availableCoordinate)
-    );
-  });
-
-  if (allCoordinatesExist) {
-    return ShipCoordinates;
-  } else {
-    return buildShipFromRandomCoordinates(availableCoordinatesArray, ship);
-  }
+  return allCoordinatesExist
+    ? shipCoordinates
+    : buildShipFromRandomCoordinates(availableCoordinatesArray, ship);
 };
