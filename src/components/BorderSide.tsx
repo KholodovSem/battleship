@@ -9,7 +9,7 @@ interface BorderSideProps {
 }
 
 const BorderSide = ({ items, position }: BorderSideProps) => {
-  const borderSideDefaultStyle = 'absolute grid';
+  const borderSideDefaultStyle = 'absolute grid select-none';
   const topBorderSideStyle = `left-0 top-[-30px] right-0 grid-cols-[repeat(10,1fr)]`;
   const leftBorderSideStyle = 'left-[-20px] top-0 bottom-0';
 

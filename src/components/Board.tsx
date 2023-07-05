@@ -1,132 +1,46 @@
-import { useState, type MouseEvent } from 'react';
-import { Cell, CellType } from '@/components/Cell';
+import type { MouseEvent } from 'react';
+import type { ShipCoordinates } from '@/models';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '@/hooks';
+import { selectShipsOnBoard } from '@/store/selectors/ships-selectors';
+import { filteredCells } from '@/store/selectors/cells-selectors';
+import { changeCellType } from '@/store/cells-slice';
+import { CELL_DATA_TYPE } from '@/utils';
 import { BorderSide } from '@/components/BorderSide';
-
-const BOARD_HEIGHT = 10;
-const BOARD_WIDTH = 10;
-const CELL_TYPE_IN_HTML = 'board-cell';
+import { Cell, CellType } from '@/components/Cell';
+import { ShipComponent } from '@/components/ShipComponent';
 
 const NUMERIC_SIDE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const ALPHABETIC_SIDE = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 
-/* 
-Number of ships
-
-Huge ship - 1;
-Big ship - 2;
-Medium ship - 3;
-Small ship - 4;
-
-TOTAL = 10;
-*/
-
-//Huge ship takes 4 cells
-//Big ship takes 3 cells
-//Medium ship takes 2 cells
-//Small ship takes 1 cells
-type ShipType = 'Huge ship' | 'Big ship' | 'Medium ship' | 'Small ship';
-
-//Possible orientation is "Horizontal" or "Vertical"
-type ShipOrientation = 'horizontal' | 'vertical';
-
-//Actually it's cell index
-type RowIndex = number;
-type ColumnIndex = number;
-
-//RowIndex - each vertical cell
-//ColumnIndex - each horizontal cell
-type ShipCoordinates = [RowIndex, ColumnIndex];
-
-interface Ship {
-  type: ShipType;
-  orientation: ShipOrientation;
-  coordinates: ShipCoordinates[];
-  damaged: ShipCoordinates[];
-}
-
-//TODO: Handle dublicates in "coordinates", "damaged", "missedShoots" when handlingBoardClick.
-
-const initialState: Ship[] = [
-  {
-    type: 'Huge ship',
-    orientation: 'horizontal',
-    coordinates: [
-      [0, 1],
-      [0, 2],
-      [0, 3],
-      [0, 4],
-    ],
-    damaged: [],
-  },
-];
-
 export const Board = () => {
-  const [ships, setShips] = useState<Ship[]>(initialState);
-  const [missedShoots, setMissedShoots] = useState<ShipCoordinates[]>([]);
+  const cells = useSelector(filteredCells);
+  const shipsOnBoard = useSelector(selectShipsOnBoard);
+  const dispatch = useAppDispatch();
 
   const boardWrapperStyle =
     'relative w-full h-screen flex items-center justify-center';
   const boardStyle =
     'relative w-full h-full max-w-[600px] max-h-[600px] grid grid-cols-[repeat(10,1fr)] gap-[1px]';
 
-  //Function takes two corteges with coordinates and makes array decomposition
-  //then it compares rowIndex & columnIndex from each tuple
-  const isEqualCoordinates = (
-    coordinates1: ShipCoordinates,
-    coordinates2: ShipCoordinates
-  ) => {
-    const [rowIndex1, columnIndex1] = coordinates1;
-    const [rowIndex2, columnIndex2] = coordinates2;
-    return rowIndex1 === rowIndex2 && columnIndex1 === columnIndex2;
-  };
-
-  //Array.some() - Checks if at least one element of the array satisfies the condition
-  const findShipByOccupiedCell = (coordinates: ShipCoordinates) =>
-    ships.find(ship =>
-      ship.coordinates.some(coord => isEqualCoordinates(coord, coordinates))
-    );
-
-  const findShipByHittedCell = (coordinates: ShipCoordinates) =>
-    ships.find(ship =>
-      ship.damaged.some(coord => isEqualCoordinates(coord, coordinates))
-    );
-
-  const isMissedCell = (coordinates: ShipCoordinates) => {
-    return missedShoots.some(coord => isEqualCoordinates(coord, coordinates));
-  };
-
   //We using event delegation for click handling
   const handleBoardClick = (event: MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     const cell = target.closest(
-      `[data-type="${CELL_TYPE_IN_HTML}"]`
+      `[data-type="${CELL_DATA_TYPE}"]`
     ) as HTMLDivElement; //about closest method https://developer.mozilla.org/en-US/docs/Web/API/Element/closest
 
     if (!cell) return;
 
     //getAttribute return string, we need parse it to number
+    const cellType = cell.getAttribute('data-cell-type');
     const rowIndex = parseInt(cell.getAttribute('data-row-index')!);
     const columnIndex = parseInt(cell.getAttribute('data-column-index')!);
     const coordinates: ShipCoordinates = [rowIndex, columnIndex];
 
-    const ship = findShipByOccupiedCell(coordinates);
+    if (cellType === CellType.MISS) return;
 
-    if (ship) {
-      console.log('A');
-      const damaged = [...ship.damaged, coordinates];
-      const updatedShip = { ...ship, damaged };
-      setShips(currentShips =>
-        currentShips.map(currentShip =>
-          currentShip === ship ? updatedShip : currentShip
-        )
-      );
-      return;
-    }
-
-    setMissedShoots(currentMissedShoots => [
-      ...currentMissedShoots,
-      coordinates,
-    ]);
+    dispatch(changeCellType({ coordinates, type: CellType.MISS }));
   };
 
   return (
@@ -134,29 +48,49 @@ export const Board = () => {
       <div className={boardStyle} onClick={handleBoardClick}>
         <BorderSide items={NUMERIC_SIDE} position="top" />
         <BorderSide items={ALPHABETIC_SIDE} position="left" />
-        {Array.from({ length: BOARD_HEIGHT }, (_, rowIndex) =>
-          Array.from({ length: BOARD_WIDTH }, (_, columnIndex) => {
-            const coordinates: ShipCoordinates = [rowIndex, columnIndex];
-
-            let type: null | CellType = null;
-
-            if (findShipByOccupiedCell(coordinates)) type = CellType.OCCUPIED;
-            if (findShipByHittedCell(coordinates)) type = CellType.HITTED;
-            if (isMissedCell(coordinates)) type = CellType.MISS;
-
-            //In another case type = null, that we handling with ?? operator that return right operator if left one is null or undefined
+        {cells.map(cellsArray =>
+          cellsArray.map(cell => {
+            const [row, column] = cell.coordinates;
 
             return (
               <Cell
-                key={`${rowIndex}-${columnIndex}`}
-                type={type ?? CellType.EMPTY}
-                data-type={CELL_TYPE_IN_HTML}
-                data-row-index={rowIndex}
-                data-column-index={columnIndex}
+                key={`${row}-${column}`}
+                type={cell.type}
+                row={row}
+                column={column}
+                data-type={CELL_DATA_TYPE}
+                data-row-index={row}
+                data-column-index={column}
+                data-cell-type={cell.type}
               />
             );
           })
         )}
+        {shipsOnBoard.map(ship => {
+          const { id, coordinates } = ship;
+
+          const GRID_OFFSET = 1;
+
+          const [startShipRowIndex, startRowColumnIndex] = coordinates[0];
+          const [endShipRowIndex, endRowColumnIndex] =
+            coordinates[coordinates.length - 1];
+
+          return (
+            <div
+              key={id}
+              style={{
+                gridRow: `${startShipRowIndex} / ${
+                  endShipRowIndex + GRID_OFFSET
+                }`,
+                gridColumn: `${startRowColumnIndex} / ${
+                  endRowColumnIndex + GRID_OFFSET
+                }`,
+              }}
+            >
+              <ShipComponent ship={ship} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
